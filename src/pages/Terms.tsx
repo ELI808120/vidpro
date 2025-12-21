@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { ShieldAlert, FileText, AlertTriangle, Send, CheckCircle, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldAlert, FileText, AlertTriangle, Send, X, ExternalLink, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/DataService';
 import { toast, Toaster } from 'react-hot-toast';
 
@@ -12,7 +12,6 @@ const Terms: React.FC = () => {
   const handleReport = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSending(true);
-    
     const { data: { session } } = await supabase.auth.getSession();
     
     const { error } = await supabase.from('contact_messages').insert([{
@@ -32,87 +31,112 @@ const Terms: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-16 px-6 text-right transition-colors dark:text-white" dir="rtl">
+    <div className="max-w-4xl mx-auto py-10 px-4 text-right" dir="rtl">
       <Toaster />
-      <div className="bg-white dark:bg-slate-900 p-10 rounded-[50px] shadow-2xl border border-slate-100 dark:border-slate-800 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-2 h-full bg-blue-600"></div>
+      
+      {/* כרטיס ראשי עם ניגודיות גבוהה */}
+      <div className="bg-white border-2 border-gray-200 shadow-xl rounded-2xl overflow-hidden text-black">
         
-        <h1 className="text-4xl font-black mb-8 flex items-center gap-4 italic">
-          מדיניות תוכן ותנאי שימוש <ShieldAlert size={36} className="text-blue-600" />
-        </h1>
+        {/* כותרת עליונה בולטת */}
+        <div className="bg-blue-700 p-6 text-white flex justify-between items-center">
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+             מדיניות ותנאי שימוש <ShieldAlert size={30} />
+          </h1>
+        </div>
 
-        <div className="space-y-8 text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-          <section className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl">
-            <h2 className="text-xl font-black mb-4 text-slate-900 dark:text-white flex items-center gap-2 italic">
-              <FileText size={20} className="text-blue-500" /> כללי הקהילה
+        <div className="p-6 md:p-10 space-y-8">
+          
+          {/* הבהרת אי-קשר לנטפרי - בולט מאוד */}
+          <div className="bg-yellow-50 border-2 border-yellow-400 p-5 rounded-lg text-black">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-2">
+              <AlertTriangle className="text-red-600" /> הבהרה חשובה
+            </h3>
+            <p className="text-md leading-relaxed">
+              אתר <strong>VIDPRO</strong> הינו אתר פרטי. 
+              <span className="underline decoration-red-500 font-black px-1">האתר אינו קשור, מופעל או ממומן על ידי ארגון "נטפרי".</span> 
+              המדיניות להלן נועדה להתאים את האתר לכללי הקהילה החרדית בלבד.
+            </p>
+          </div>
+
+          {/* סעיף נטפרי */}
+          <section className="border-b-2 border-gray-100 pb-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-blue-800">
+              <ShieldCheck className="text-green-600" /> התאמה למדיניות נטפרי
             </h2>
-            <p>אין להעלות תוכן המפר זכויות יוצרים, תוכן פוגעני, אלים או כזה המפר את חוקי מדינת ישראל.</p>
+            <p className="mb-4 text-lg">
+              אנו מחויבים לכללי המדיניות של נטפרי כפי שמופיעים ב
+              <a href="https://netfree.link/wiki/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA_%D7%A0%D7%98%D7%A4%D7%A8%D7%99" 
+                 target="_blank" rel="noopener noreferrer" className="font-bold text-blue-700 underline mx-1">
+                וויקי נטפרי <ExternalLink size={14} className="inline" />
+              </a>:
+            </p>
+            <ul className="list-disc list-inside space-y-3 font-medium text-gray-800 text-md">
+              <li>איסור מוחלט על תכני תועבה, כפירה או בידור פסול.</li>
+              <li>איסור על העלאת תמונות או סרטונים הכוללים נשים.</li>
+              <li>האתר מיועד לתוכן תועלתי/לימודי לטובת הציבור החרדי.</li>
+            </ul>
           </section>
 
-          <section className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl">
-            <h2 className="text-xl font-black mb-4 text-slate-900 dark:text-white flex items-center gap-2 italic">
-              <AlertTriangle size={20} className="text-orange-500" /> דיווח על הפרות
-            </h2>
-            <p className="mb-6">נתקלתם בתוכן שעובר על הכללים? אנחנו לוקחים זאת ברצינות רבה.</p>
-            
-            {/* הכפתור החדש שמחליף את המייל */}
+          {/* כפתור דיווח ענק ובולט */}
+          <section className="bg-red-50 p-6 rounded-xl border-2 border-red-200 text-center">
+            <h3 className="text-xl font-bold text-red-700 mb-4 italic">מצאתם תוכן בעייתי או כזה שאינו תואם למדיניות?</h3>
             <button 
               onClick={() => setShowReportModal(true)}
-              className="bg-red-500 hover:bg-red-600 text-white px-8 py-4 rounded-2xl font-black transition-all shadow-lg shadow-red-500/20 flex items-center gap-3"
+              className="bg-red-600 hover:bg-red-700 text-white text-xl font-black py-5 px-10 rounded-xl transition-transform active:scale-95 shadow-lg flex items-center justify-center gap-3 mx-auto w-full md:w-auto"
             >
-              <AlertTriangle size={20} /> דווח על תוכן פוגעני באתר
+              <AlertTriangle size={24} /> לחץ כאן לדיווח על תוכן
             </button>
           </section>
+
         </div>
       </div>
 
-      {/* מודאל דיווח (חלון קופץ) */}
+      {/* מודאל דיווח - עיצוב נקי עם אותיות שחורות בולטות */}
       {showReportModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md bg-black/40">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[40px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in duration-300">
-            <div className="p-8">
-              <div className="flex justify-between items-center mb-6 flex-row-reverse">
-                <h3 className="text-2xl font-black italic dark:text-white">דיווח על תוכן</h3>
-                <button onClick={() => setShowReportModal(false)} className="text-slate-400 hover:text-red-500 transition-colors">
-                  <X size={24} />
-                </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-lg rounded-2xl border-4 border-gray-300 shadow-2xl p-8 relative">
+            
+            <div className="flex justify-between items-center mb-6 border-b-2 pb-2">
+              <button onClick={() => setShowReportModal(false)} className="text-gray-500 hover:text-red-600">
+                <X size={30} />
+              </button>
+              <h3 className="text-2xl font-bold text-black italic">דיווח למנהל</h3>
+            </div>
+
+            <form onSubmit={handleReport} className="space-y-6 text-right">
+              <div>
+                <label className="block text-black font-bold mb-2">סוג הבעיה:</label>
+                <select 
+                  value={reportType} 
+                  onChange={(e) => setReportType(e.target.value)}
+                  className="w-full p-4 bg-gray-100 text-black font-bold border-2 border-gray-400 rounded-lg focus:border-blue-600 outline-none"
+                >
+                  <option>תוכן שאינו הולם את מדיניות נטפרי</option>
+                  <option>הפרת זכויות יוצרים</option>
+                  <option>תוכן פוגעני או אלים</option>
+                  <option>אחר</option>
+                </select>
               </div>
 
-              <form onSubmit={handleReport} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-black mb-2 mr-2">סוג ההפרה</label>
-                  <select 
-                    value={reportType} 
-                    onChange={(e) => setReportType(e.target.value)}
-                    className="w-full p-4 bg-slate-100 dark:bg-slate-800 dark:text-white rounded-2xl border-none focus:ring-2 ring-red-500 font-bold"
-                  >
-                    <option>תוכן לא ראוי</option>
-                    <option>הפרת זכויות יוצרים</option>
-                    <option>הטרדה או בריונות</option>
-                    <option>תוכן מטעה / ספאם</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-black font-bold mb-2">פרטים (לינק או סיבה):</label>
+                <textarea 
+                  required
+                  value={reportMsg}
+                  onChange={(e) => setReportMsg(e.target.value)}
+                  rows={4}
+                  placeholder="כתוב כאן..."
+                  className="w-full p-4 bg-gray-100 text-black font-bold border-2 border-gray-400 rounded-lg focus:border-red-600 outline-none placeholder-gray-500"
+                ></textarea>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-black mb-2 mr-2">פרטים נוספים (לינק לסרטון, סיבה)</label>
-                  <textarea 
-                    required
-                    value={reportMsg}
-                    onChange={(e) => setReportMsg(e.target.value)}
-                    rows={4}
-                    placeholder="פרט כאן מדוע התוכן בעייתי..."
-                    className="w-full p-4 bg-slate-100 dark:bg-slate-800 dark:text-white rounded-2xl border-none focus:ring-2 ring-red-500 outline-none"
-                  ></textarea>
-                </div>
-
-                <button 
-                  disabled={isSending}
-                  className="w-full bg-red-500 hover:bg-red-600 text-white p-5 rounded-2xl font-black text-xl flex items-center justify-center gap-3 transition-all"
-                >
-                  {isSending ? 'שולח דיווח...' : <><Send size={20} /> שלח דיווח למנהל</>}
-                </button>
-              </form>
-            </div>
+              <button 
+                disabled={isSending}
+                className="w-full bg-blue-700 hover:bg-blue-800 text-white p-5 rounded-xl font-black text-xl flex items-center justify-center gap-3"
+              >
+                {isSending ? 'שולח כעת...' : <><Send size={24} /> שלח דיווח למנהל</>}
+              </button>
+            </form>
           </div>
         </div>
       )}
