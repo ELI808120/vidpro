@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../lib/DataService';
 import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
@@ -24,6 +24,17 @@ const Auth: React.FC = () => {
       toast.success(isSignUp ? 'נרשמת בהצלחה!' : 'התחברת בהצלחה!');
       // התיקון הקריטי: מרענן את הדף כדי לאפס את כל ה-State של האפליקציה
       setTimeout(() => window.location.reload(), 500);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    });
+    if (error) {
+      toast.error(error.message);
+      setLoading(false);
     }
   };
 
@@ -63,6 +74,27 @@ const Auth: React.FC = () => {
           {loading ? <Loader2 className="animate-spin" /> : (isSignUp ? 'צור חשבון' : 'כניסה למערכת')}
         </button>
       </form>
+
+      <div className="relative my-4">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-slate-300 dark:border-slate-700" />
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="bg-white dark:bg-slate-900 px-2 text-slate-500 dark:text-slate-400">
+            או התחבר עם
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <button 
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          className="w-full bg-red-600 hover:bg-red-700 text-white p-4 rounded-2xl font-black text-lg transition-all shadow-lg shadow-red-500/25 flex items-center justify-center gap-2"
+        >
+          {loading ? <Loader2 className="animate-spin" /> : 'התחבר עם גוגל'}
+        </button>
+      </div>
 
       <button 
         onClick={() => setIsSignUp(!isSignUp)}
