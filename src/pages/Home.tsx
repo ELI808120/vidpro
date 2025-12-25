@@ -1,11 +1,15 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '../lib/DataService';
 import VideoCard from '../components/VideoCard';
 import CategoryBar from '../components/CategoryBar';
 import { Sparkles, PlayCircle, SearchX, Loader2 } from 'lucide-react';
 
-const Home: React.FC = () => {
+interface HomeProps {
+  session: any;
+}
+
+const Home: React.FC<HomeProps> = ({ session }) => {
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('הכל');
@@ -14,17 +18,24 @@ const Home: React.FC = () => {
   const searchQuery = new URLSearchParams(location.search).get('q') || '';
 
   useEffect(() => {
-    const fetchVideos = async () => {
-      setLoading(true);
-      let query = supabase.from('videos').select('*').order('created_at', { ascending: false });
-      if (activeCategory !== 'הכל') query = query.eq('category', activeCategory);
-      if (searchQuery) query = query.ilike('title', `%${searchQuery}%`);
-      const { data, error } = await query;
-      if (!error) setVideos(data || []);
+    if (session) {
+      const fetchVideos = async () => {
+        setLoading(true);
+        let query = supabase.from('videos').select('*').order('created_at', { ascending: false });
+        if (activeCategory !== 'הכל') query = query.eq('category', activeCategory);
+        if (searchQuery) query = query.ilike('title', `%${searchQuery}%`);
+        const { data, error } = await query;
+        if (!error) {
+          setVideos(data || []);
+        }
+        setLoading(false);
+      };
+      fetchVideos();
+    } else {
       setLoading(false);
-    };
-    fetchVideos();
-  }, [activeCategory, searchQuery]);
+      setVideos([]);
+    }
+  }, [session, activeCategory, searchQuery]);
 
   return (
     <div className="min-h-screen bg-[#001e3c] text-white pb-20 px-6" dir="rtl">
@@ -76,7 +87,12 @@ const Home: React.FC = () => {
           <div className="text-center py-40 bg-[#0a2744]/20 rounded-[40px] border-2 border-dashed border-blue-800/30">
              <SearchX size={64} className="mx-auto text-blue-500/50 mb-6" />
              <h2 className="text-3xl font-black text-blue-200 italic mb-4">אופס! לא מצאנו כלום</h2>
-             <button onClick={() => setActiveCategory('הכל')} className="text-yellow-400 font-black hover:underline text-lg">
+             {session ? (
+                <p className="text-slate-400">אולי תנסה קטגוריה אחרת?</p>
+             ) : (
+                <p className="text-slate-400">נראה שאתה לא מחובר. התחבר כדי לראות את התוכן.</p>
+             )}
+             <button onClick={() => setActiveCategory('הכל')} className="mt-4 text-yellow-400 font-black hover:underline text-lg">
                חזרה לכל הסרטונים
              </button>
           </div>

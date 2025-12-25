@@ -1,5 +1,6 @@
-﻿import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { supabase } from './lib/DataService';
 
 // רכיבים קבועים
 import Navbar from './components/Navbar';
@@ -37,6 +38,22 @@ import Advertisers from './pages/Advertisers';
 import NotFound from './pages/NotFound';
 
 function App() {
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="min-h-screen bg-[#001e3c] flex flex-col font-sans text-white">
@@ -44,7 +61,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             {/* נתיבים ציבוריים */}
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home session={session}/>} />
             <Route path="/upload" element={<Upload />} />
             <Route path="/video/:id" element={<VideoView />} />
             <Route path="/details/:id" element={<VideoDetails />} />
@@ -67,7 +84,7 @@ function App() {
             {/* מידע כללי */}
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/policy" element={<Policy />} />
+            <Route path="/policy" emelent={<Policy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/advertisers" element={<Advertisers />} />
             <Route path="/maintenance" element={<Maintenance />} />
