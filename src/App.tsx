@@ -1,34 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { supabase } from './lib/DataService';
+import { Loader2 } from 'lucide-react';
 
-// רכיבים קבועים
+// ... imports for components and pages ...
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
-
-// דפים ראשיים
 import Home from './pages/Home';
 import Upload from './pages/Upload';
 import VideoView from './pages/VideoView';
 import VideoDetails from './pages/VideoDetails';
 import Search from './pages/Search';
-
-// מערכת משתמשים
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Auth from './pages/Auth';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
-
-// ניהול (Admin)
 import Admin from './pages/Admin';
 import AdminAds from './pages/AdminAds';
 import AdminControl from './pages/AdminControl';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminChangelog from './pages/AdminChangelog';
-
-// מידע ותמיכה
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Policy from './pages/Policy';
@@ -37,22 +30,36 @@ import Maintenance from './pages/Maintenance';
 import Advertisers from './pages/Advertisers';
 import NotFound from './pages/NotFound';
 
+
 function App() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<any | null>(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
 
   useEffect(() => {
+    // בדוק את הסשן הנוכחי פעם אחת כשהאפליקציה נטענת
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setLoadingAuth(false);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    // האזן לשינויים במצב האימות (כניסה/יציאה)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      // אין צורך לשנות את loadingAuth כאן, זה רק לטעינה הראשונית
     });
 
+    // נקה את המאזין כשהרכיב יורד
     return () => subscription.unsubscribe();
   }, []);
+
+  // בזמן בדיקת האימות, הצג מסך טעינה כללי
+  if (loadingAuth) {
+    return (
+      <div className="min-h-screen bg-[#001e3c] flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-yellow-400 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -60,36 +67,32 @@ function App() {
         <Navbar />
         <main className="flex-grow">
           <Routes>
-            {/* נתיבים ציבוריים */}
+            {/* העבר את הסשן המאומת לכל הדפים הזקוקים לו */}
             <Route path="/" element={<Home session={session}/>} />
-            <Route path="/upload" element={<Upload />} />
+            <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
             <Route path="/video/:id" element={<VideoView />} />
             <Route path="/details/:id" element={<VideoDetails />} />
             <Route path="/search" element={<Search />} />
 
-            {/* נתיבי משתמשים */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
-            {/* נתיבי ניהול מוגנים */}
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/admin/ads" element={<ProtectedRoute><AdminAds /></ProtectedRoute>} />
             <Route path="/admin/control" element={<ProtectedRoute><AdminControl /></ProtectedRoute>} />
             <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/changelog" element={<ProtectedRoute><AdminChangelog /></ProtectedRoute>} />
 
-            {/* מידע כללי */}
+            {/* ... שאר הנתיבים ... */}
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/policy" emelent={<Policy />} />
+            <Route path="/policy" element={<Policy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/advertisers" element={<Advertisers />} />
             <Route path="/maintenance" element={<Maintenance />} />
-
-            {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
